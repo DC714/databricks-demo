@@ -1,0 +1,6 @@
+control_family,family_name,platform_feature,how_used_in_demo
+AC,Access Control,Unity Catalog grants; row filters; column masks,Analysts see only their agency and region; identifiers masked below SECRET
+AU,Audit and Accountability,Lineage; system audit tables,Query who read the tables and trace gold tables back to the raw files
+CM,Configuration Management,Table and column tags; notebooks in source control,Tags mark sensitivity; all setup is code
+SC,System and Communications Protection,Column masks; serverless network controls,Contractor identifiers masked in query results
+SI,System and Information Integrity,Quality rules with quarantine table,Bad rows are kept out of silver and recorded with a reason

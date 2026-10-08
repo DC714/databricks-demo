@@ -1,0 +1,7 @@
+analyst_id,email,agency,clearance,region
+A001,analyst.defense.west@example.test,Department of Defense,TOP SECRET,West
+A002,analyst.defense.south@example.test,Department of Defense,SECRET,South
+A003,analyst.nasa@example.test,National Aeronautics and Space Administration,SECRET,ALL
+A004,analyst.gsa@example.test,General Services Administration,PUBLIC TRUST,Northeast
+A005,analyst.va@example.test,Department of Veterans Affairs,PUBLIC TRUST,Midwest
+A006,analyst.hhs@example.test,Department of Health and Human Services,SECRET,ALL

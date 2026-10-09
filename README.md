@@ -61,6 +61,8 @@ tests/                 local checks that run without Databricks
 
 `digital-natives-kit/` is a separate learning project (synthetic consumption data, account health analytics, and a program playbook for digital native companies). See its README.
 
+`mission-agent/` is a third learning project: a retrieval agent over public NIST documents with citations, guardrails, and a measured evaluation.
+
 ## Status
 
 Module A: notebooks 01 to 04, talk track, and reference architecture are written. Screenshots (docs/img) are still to capture. Later modules (agent, GTM kit) are out of scope for this repo state.

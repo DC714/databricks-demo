@@ -14,7 +14,8 @@ CLI = os.environ.get("DATABRICKS_BIN", "databricks")
 me = json.loads(subprocess.check_output([CLI, "current-user", "me"]))["userName"]
 
 datasets = {
-    "trend": f"SELECT date_format(month, 'yyyy-MM') AS month, segment, round(units) AS units FROM {cat}.dn_gold.segment_trend ORDER BY month",
+    "trend": f"SELECT date_format(month, 'yyyy-MM') AS month, segment, round(units) AS units FROM {cat}.dn_gold.segment_trend "
+             f"WHERE month < (SELECT max(month) FROM {cat}.dn_gold.segment_trend) ORDER BY month",
     "status": f"SELECT status, segment, count(*) AS accounts FROM {cat}.dn_gold.account_status GROUP BY status, segment ORDER BY status",
     "ttv": f"SELECT segment, round(avg(days_to_production)) AS avg_days_to_production FROM {cat}.dn_gold.time_to_value GROUP BY segment",
     "attention": (f"SELECT account_name, segment, status, health_score, round(momentum_ratio, 2) AS momentum_ratio, workloads "
@@ -42,7 +43,7 @@ def enc(x, y, color=None, xtype="categorical"):
 tcols = ["account_name", "segment", "status", "health_score", "momentum_ratio", "workloads"]
 layout = [
     widget("w1", "trend", ["month", "segment", "units"], {"widgetType": "line", "encodings": enc("month", "units", "segment")},
-           "Monthly compute units by segment (synthetic)", (0, 0, 6, 6)),
+           "Monthly compute units by segment, complete months only (synthetic)", (0, 0, 6, 6)),
     widget("w2", "status", ["status", "segment", "accounts"], {"widgetType": "bar", "encodings": enc("status", "accounts", "segment")},
            "Accounts by health status (synthetic)", (0, 6, 3, 6)),
     widget("w3", "ttv", ["segment", "avg_days_to_production"], {"widgetType": "bar", "encodings": enc("segment", "avg_days_to_production")},

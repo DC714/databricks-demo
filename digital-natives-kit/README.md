@@ -50,6 +50,15 @@ python3 digital-natives-kit/scripts/create_dashboard.py <catalog> <warehouse_id>
 python3 -m unittest discover digital-natives-kit/tests
 ```
 
+## Dashboard
+
+![Monthly compute units by segment](docs/img/consumption-trend.png)
+![Accounts by health status](docs/img/status-by-segment.png)
+![Average days to first production workload](docs/img/days-to-production.png)
+![Accounts needing action](docs/img/attention-table.png)
+
+How to read these: all data is synthetic. The two segments have nearly identical consumption and time to production because the generator gives them the same pattern mix and similar scale, so do not read segment differences, or the lack of them, as findings. The trend screenshot may include the last, partial month (data ends mid-September), which shows a drop that is not a real decline. The dashboard script now leaves that month out.
+
 ## Check against the hidden patterns
 
 Notebook 03 compares each account's computed status with the generator's hidden pattern. On the committed data: all 7 churn-risk accounts are flagged at risk, all 4 late bloomers are flagged as expansion candidates, all 8 plateau accounts land on watch, and 8 of 10 fast ramp accounts are healthy. This shows the scoring logic behaves as designed. It is not evidence that it predicts real churn.

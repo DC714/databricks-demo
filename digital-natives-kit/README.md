@@ -57,7 +57,7 @@ python3 -m unittest discover digital-natives-kit/tests
 ![Average days to first production workload](docs/img/days-to-production.png)
 ![Accounts needing action](docs/img/attention-table.png)
 
-How to read these: all data is synthetic. The two segments have nearly identical consumption and time to production because the generator gives them the same pattern mix and similar scale, so do not read segment differences, or the lack of them, as findings. The trend screenshot may include the last, partial month (data ends mid-September), which shows a drop that is not a real decline. The dashboard script now leaves that month out.
+How to read these: all data is synthetic. The two segments have nearly identical consumption and time to production because the generator gives them the same pattern mix and similar scale, so do not read segment differences, or the lack of them, as findings. The trend chart leaves out the last month, because the data ends mid-September and a partial month would show a false drop.
 
 ## Check against the hidden patterns
 

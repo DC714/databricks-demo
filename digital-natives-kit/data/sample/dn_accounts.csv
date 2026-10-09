@@ -1,0 +1,41 @@
+account_id,account_name,segment,signup_date,region,employee_band,generator_archetype
+DN001,Willow Demo,ai_native,2026-01-27,APJ,11-50,fast_ramp
+DN002,Sable Demo,ai_native,2026-01-21,North America,201-1000,fast_ramp
+DN003,Aspen Demo,ai_native,2025-12-24,LATAM,51-200,fast_ramp
+DN004,Copper Demo,ai_native,2026-01-08,APJ,11-50,fast_ramp
+DN005,Cedar Demo,ai_native,2026-01-08,APJ,51-200,fast_ramp
+DN006,Quill Demo,ai_native,2025-12-23,LATAM,11-50,fast_ramp
+DN007,Nimbus Demo,ai_native,2025-10-08,LATAM,51-200,fast_ramp
+DN008,Echo Demo,ai_native,2025-11-18,APJ,51-200,steady_grower
+DN009,Saffron Demo,ai_native,2025-12-31,North America,51-200,steady_grower
+DN010,Ember Demo,ai_native,2025-10-27,EMEA,51-200,steady_grower
+DN011,Yarrow Demo,ai_native,2025-11-11,North America,11-50,steady_grower
+DN012,Cobalt Demo,ai_native,2025-12-10,EMEA,11-50,plateau
+DN013,Lumen Demo,ai_native,2025-10-30,APJ,11-50,plateau
+DN014,Marlin Demo,ai_native,2025-11-17,APJ,51-200,plateau
+DN015,Vesper Demo,ai_native,2026-01-15,EMEA,201-1000,churn_risk
+DN016,Birch Demo,ai_native,2025-11-24,APJ,201-1000,churn_risk
+DN017,Fable Demo,ai_native,2025-11-14,LATAM,201-1000,churn_risk
+DN018,Orchid Demo,ai_native,2025-12-08,APJ,11-50,churn_risk
+DN019,Kestrel Demo,ai_native,2026-02-11,APJ,51-200,late_bloomer
+DN020,Hollow Demo,ai_native,2026-01-08,APJ,51-200,late_bloomer
+DN021,Zephyr Demo,data_heavy_saas,2026-01-01,North America,11-50,fast_ramp
+DN022,Pebble Demo,data_heavy_saas,2025-11-25,APJ,11-50,fast_ramp
+DN023,Beacon Demo,data_heavy_saas,2025-10-15,North America,201-1000,fast_ramp
+DN024,Jasper Demo,data_heavy_saas,2025-10-06,APJ,51-200,steady_grower
+DN025,Umber Demo,data_heavy_saas,2026-01-27,EMEA,201-1000,steady_grower
+DN026,Falcon Demo,data_heavy_saas,2025-10-16,LATAM,51-200,steady_grower
+DN027,Harbor Demo,data_heavy_saas,2026-01-08,North America,201-1000,steady_grower
+DN028,Juniper Demo,data_heavy_saas,2025-11-04,North America,201-1000,steady_grower
+DN029,Quartz Demo,data_heavy_saas,2025-11-27,North America,51-200,steady_grower
+DN030,Onyx Demo,data_heavy_saas,2025-10-30,North America,51-200,steady_grower
+DN031,Mosaic Demo,data_heavy_saas,2025-11-26,North America,11-50,plateau
+DN032,Thistle Demo,data_heavy_saas,2025-12-25,LATAM,11-50,plateau
+DN033,Glacier Demo,data_heavy_saas,2026-02-10,North America,51-200,plateau
+DN034,Granite Demo,data_heavy_saas,2026-01-29,LATAM,201-1000,plateau
+DN035,Ripple Demo,data_heavy_saas,2026-01-09,APJ,51-200,plateau
+DN036,Meridian Demo,data_heavy_saas,2026-01-08,North America,201-1000,churn_risk
+DN037,Lantern Demo,data_heavy_saas,2025-11-05,EMEA,201-1000,churn_risk
+DN038,Indigo Demo,data_heavy_saas,2025-10-31,EMEA,201-1000,churn_risk
+DN039,Tundra Demo,data_heavy_saas,2025-10-16,LATAM,51-200,late_bloomer
+DN040,Drift Demo,data_heavy_saas,2026-02-10,North America,51-200,late_bloomer

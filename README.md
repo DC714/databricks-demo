@@ -57,6 +57,10 @@ scripts/               data download helpers
 tests/                 local checks that run without Databricks
 ```
 
+## Related
+
+`digital-natives-kit/` is a separate learning project (synthetic consumption data, account health analytics, and a program playbook for digital native companies). See its README.
+
 ## Status
 
 Module A: notebooks 01 to 04, talk track, and reference architecture are written. Screenshots (docs/img) are still to capture. Later modules (agent, GTM kit) are out of scope for this repo state.

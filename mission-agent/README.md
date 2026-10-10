@@ -7,7 +7,7 @@ A learning project: a small retrieval agent that answers questions about public 
 - This is a learning project, not production experience with agents on Databricks. It does not use Agent Bricks, which is not on Free Edition.
 - The corpus is three public NIST documents (CSF 2.0, SP 800-61 Rev. 3, SP 800-37 Rev. 2), 701 text chunks. NIST publications are US government works.
 - The eval set is 32 questions I wrote, 24 in scope. It is small, so treat the numbers as a sanity check, not a benchmark.
-- Retrieval runs in memory over a Delta table of embeddings. I did not build a Vector Search index.
+- The agent's retrieval runs in memory over a Delta table of embeddings. I also built a Databricks Vector Search index over the same vectors and compared retrieval only (see `docs/evaluation.md`). The agent itself was not switched to Vector Search.
 
 ## Model choices
 
@@ -50,7 +50,7 @@ See `docs/evaluation.md` for the numbers, the failures, and what they do and do 
 |---|---|
 | Corpus builder | `scripts/build_corpus.py`, output `data/nist_chunks.csv` |
 | Eval questions | `data/eval_questions.csv` |
-| Notebooks | `notebooks/00_check_embeddings.py`, `01_embed_corpus.py`, `02_rag_agent.py`, `03_evaluate.py` |
+| Notebooks | `notebooks/00_check_embeddings.py`, `01_embed_corpus.py`, `02_rag_agent.py`, `03_evaluate.py`, `04_vector_search_compare.py` |
 | Helpers | `scripts/run_notebook.sh`, `scripts/sql.sh` |
 | Tests | `tests/` |
 | Talk track | `docs/talk-track.md` |
@@ -69,6 +69,15 @@ mission-agent/scripts/run_notebook.sh 01_embed_corpus
 databricks workspace import /Users/<you>/databricks-demo-agent/02_rag_agent --file mission-agent/notebooks/02_rag_agent.py --format SOURCE --language PYTHON --overwrite
 mission-agent/scripts/run_notebook.sh 03_evaluate
 python3 -m unittest discover mission-agent/tests
+```
+
+Optional Vector Search comparison (on Free Edition one endpoint is allowed, so check your quota first):
+
+```bash
+databricks vector-search-endpoints create-endpoint mission-agent-vs STANDARD --no-wait
+# source table with Change Data Feed, then a Delta Sync index with self-managed 384-dimension embeddings
+# (SQL and index JSON are in docs/evaluation.md), then:
+mission-agent/scripts/run_notebook.sh 04_vector_search_compare
 ```
 
 To rebuild the corpus, download the three PDFs named in `scripts/build_corpus.py` into an empty folder and run it against that folder.

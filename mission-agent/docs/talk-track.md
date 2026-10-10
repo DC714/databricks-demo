@@ -26,13 +26,13 @@ Corpus builder, embedding notebook, agent with four guardrails, a 32-question ev
 ## What I do not know yet
 
 - How this behaves at agency scale, with thousands of documents and access control per document.
-- Whether Vector Search beats my in-memory search on quality and latency.
+- Whether Vector Search pays off at scale. On 701 chunks it retrieved nearly the same results as in-memory search and was slower per query, so I cannot say.
 - Whether the embedding model has the lineage property I wanted. I could not verify it fully.
 - How well the judge agrees with a human on harder answers.
 
 ## Likely questions
 
 - *"Is this Agent Bricks?"* No, that is not on Free Edition. This is hand-built.
-- *"Why is retrieval in memory?"* It fits 701 chunks and kept the first version simple. Vector Search is the next comparison.
+- *"Why is retrieval in memory?"* It fits 701 chunks and kept the first version simple. I also built a Vector Search index and compared retrieval: same top result on all 32 questions, slower per query at this size.
 - *"Which model is better?"* My data cannot say. The gap is one question.
 - *"What stops prompt injection?"* Passages are framed as data and a canary check catches leaks, but I only tested injection in the question, not planted in a document.

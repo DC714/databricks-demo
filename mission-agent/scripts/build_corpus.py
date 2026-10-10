@@ -24,6 +24,7 @@ WORDS, OVERLAP = 200, 40
 
 def clean(t):
     t = re.sub(r"-\n(?=[a-z])", "", t)
+    t = t.replace("\u2013", "-").replace("\u2014", "-")  # repo rule: no em or en dashes
     return re.sub(r"\s+", " ", t).strip()
 
 

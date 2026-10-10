@@ -7,7 +7,7 @@ A learning project: a small retrieval agent that answers questions about public 
 - This is a learning project, not production experience with agents on Databricks. It does not use Agent Bricks, which is not on Free Edition.
 - The corpus is three public NIST documents (CSF 2.0, SP 800-61 Rev. 3, SP 800-37 Rev. 2), 701 text chunks. NIST publications are US government works.
 - The eval set is 32 questions I wrote, 24 in scope. It is small, so treat the numbers as a sanity check, not a benchmark.
-- The agent's retrieval runs in memory over a Delta table of embeddings. I also built a Databricks Vector Search index over the same vectors and compared retrieval only (see `docs/evaluation.md`). The agent itself was not switched to Vector Search.
+- Retrieval can run in memory, on a Databricks Vector Search index, or as hybrid (vector plus keyword) on that index. Hybrid is the default. All three were evaluated end to end (see `docs/evaluation.md`).
 
 ## Model choices
 
@@ -71,12 +71,13 @@ mission-agent/scripts/run_notebook.sh 03_evaluate
 python3 -m unittest discover mission-agent/tests
 ```
 
-Optional Vector Search comparison (on Free Edition one endpoint is allowed, so check your quota first):
+Vector Search index and the retrieval comparison (on Free Edition one endpoint is allowed, so check your quota first):
 
 ```bash
 mission-agent/scripts/create_vector_index.sh <catalog> <warehouse_id>
 # wait until the index is online (15 to 20 minutes), then import notebook 02 if you have not, and:
 mission-agent/scripts/run_notebook.sh 04_vector_search_compare
+mission-agent/scripts/run_notebook.sh 03_evaluate backend=hybrid   # or vs, memory
 ```
 
 To rebuild the corpus, download the three PDFs named in `scripts/build_corpus.py` into an empty folder and run it against that folder.

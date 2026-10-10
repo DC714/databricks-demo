@@ -19,8 +19,10 @@ from sentence_transformers import SentenceTransformer
 
 dbutils.widgets.text("catalog", "workspace")
 dbutils.widgets.text("threshold", "0.5")
+dbutils.widgets.dropdown("backend", "hybrid", ["memory", "vs", "hybrid"])
 _c = dbutils.widgets.get("catalog")
 THRESHOLD = float(dbutils.widgets.get("threshold"))
+BACKEND = dbutils.widgets.get("backend")
 
 _rows = (spark.table(f"{_c}.ma.chunks").join(spark.table(f"{_c}.ma.chunk_embeddings"), "chunk_id")
          .select("chunk_id", "doc_id", "title", "page", "text", "embedding").collect())
@@ -45,10 +47,34 @@ _NOT_FOUND = "i could not find this in the documents"
 _CITE = re.compile(r"\[([A-Za-z0-9.\-]+-p\d+-\d+)\]")
 
 
-def retrieve(question, k=5):
+_idx = None
+if BACKEND != "memory":
+    from databricks.vector_search.client import VectorSearchClient
+    _idx = VectorSearchClient(disable_notice=True).get_index(endpoint_name="mission-agent-vs", index_name=f"{_c}.ma.chunk_index")
+
+
+def _vs(v, question, k, hybrid):
+    kw = dict(query_vector=v.tolist(), columns=["chunk_id", "doc_id"], num_results=k)
+    if hybrid:
+        kw.update(query_type="HYBRID", query_text=question)
+    return [(r[0], float(r[-1])) for r in _idx.similarity_search(**kw)["result"]["data_array"]]
+
+
+def retrieve_full(question, k=5):
+    """Returns (hits, gate_score). The gate always uses a similarity score on the cosine-like scale.
+    Hybrid scores are rank-fusion scores on a different scale, so hybrid asks for a vector-only
+    top score as well and gates on that."""
     v = _embedder.encode([_QPREFIX + question], normalize_embeddings=True)[0]
-    s = MAT @ v
-    return [(IDS[i], float(s[i])) for i in np.argsort(-s)[:k]]
+    if BACKEND == "memory":
+        s = MAT @ v
+        hits = [(IDS[i], float(s[i])) for i in np.argsort(-s)[:k]]
+        return hits, hits[0][1]
+    vec = _vs(v, question, k, hybrid=False)
+    return (_vs(v, question, k, hybrid=True) if BACKEND == "hybrid" else vec), vec[0][1]
+
+
+def retrieve(question, k=5):
+    return retrieve_full(question, k)[0]
 
 
 def chat(model, prompt, max_tokens=500):
@@ -62,9 +88,9 @@ def _context(hits):
 
 
 def answer(model, question, k=5):
-    hits = retrieve(question, k)
-    base = {"question": question, "model": model, "top_score": hits[0][1], "retrieved": [h[0] for h in hits]}
-    if hits[0][1] < THRESHOLD:
+    hits, gate = retrieve_full(question, k)
+    base = {"question": question, "model": model, "top_score": gate, "retrieved": [h[0] for h in hits]}
+    if gate < THRESHOLD:
         return {**base, "answer": REFUSAL, "refused": True, "reason": "low_retrieval_score", "cited": []}
     prompt = f"{RULES}\n\nPassages:\n{_context(hits)}\n\nQuestion: {question}"
     for attempt in range(2):

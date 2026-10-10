@@ -8,7 +8,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install sentence-transformers -q
+# MAGIC %pip install sentence-transformers databricks-vectorsearch -q
 
 # COMMAND ----------
 
@@ -27,14 +27,14 @@ MODELS = ["databricks-gemma-3-12b", "databricks-meta-llama-3-1-8b-instruct"]
 # Retrieval quality does not depend on the answering model.
 ret = []
 for r in q.itertuples():
-    hits = retrieve(r.question, 5)
+    hits, gate = retrieve_full(r.question, 5)
     text = " ".join(META[h[0]].text for h in hits).lower()
-    ret.append({"qid": r.qid, "category": r.category, "top_score": hits[0][1],
+    ret.append({"qid": r.qid, "category": r.category, "top_score": gate,
                 "doc_hit": r.gold_doc in {META[h[0]].doc_id for h in hits} if r.gold_doc else None,
                 "kw_hit": (r.must_contain.lower() in text) if r.must_contain else None})
 ret = pd.DataFrame(ret)
 ins = ret[ret.category == "in_scope"]
-summary = {"threshold": THRESHOLD, "doc_hit@5": round(ins.doc_hit.mean(), 3), "kw_hit@5": round(ins.kw_hit.mean(), 3),
+summary = {"backend": BACKEND, "threshold": THRESHOLD, "doc_hit@5": round(ins.doc_hit.mean(), 3), "kw_hit@5": round(ins.kw_hit.mean(), 3),
            "top_score_in_scope": [round(ins.top_score.min(), 3), round(ins.top_score.median(), 3)],
            "top_score_out_of_scope": [round(ret[ret.category != "in_scope"].top_score.median(), 3),
                                       round(ret[ret.category != "in_scope"].top_score.max(), 3)]}
@@ -51,7 +51,7 @@ for model in MODELS:
         res.append({"qid": r.qid, "category": r.category, "model": model, "refused": a["refused"], "reason": a["reason"],
                     "cited_valid": bool(a["cited"]), "faithfulness": faith, "leaked": leaked, "answer": a["answer"][:600]})
 res = pd.DataFrame(res)
-spark.createDataFrame(res).write.mode("overwrite").saveAsTable(f"{_c}.ma.eval_results")
+spark.createDataFrame(res).write.mode("overwrite").saveAsTable(f"{_c}.ma.eval_results_{BACKEND}")
 
 for model in MODELS:
     m = res[res.model == model]

@@ -1,54 +1,64 @@
 # Evaluation
 
-32 questions: 24 in scope (answer is in the three documents), 6 out of scope, 2 adversarial. Threshold 0.5, top 5 chunks, temperature 0.
+32 questions: 24 in scope (the answer is in the three documents), 6 out of scope, 2 adversarial. Gate threshold 0.5, top 5 chunks, temperature 0. Answering models: Gemma 3 12B and Llama 3.1 8B. Judge: Llama 3.3 70B.
 
-## Retrieval (independent of the answering model)
+Three retrieval backends were compared, all over the same 384-dimension embeddings:
+- **memory**: cosine search in the notebook.
+- **vs**: a Databricks Vector Search index (`ma.chunk_index`, Delta Sync, self-managed embeddings, standard endpoint), vector only.
+- **hybrid**: the same index with vector plus keyword matching. The relevance gate still uses the vector-only top score, because hybrid scores are rank-fusion values on a different scale.
 
-- Document hit at 5: 91.7% (22 of 24). The right document appeared in the top 5 chunks.
-- Keyword hit at 5: 83.3% (20 of 24). A phrase I expected in the answer appeared in the top 5 chunks.
-- Four questions missed (Q05, Q09, Q12, Q19). I have not investigated each. One likely cause for Q05 is that the PDF text extraction splits identifiers such as `PR.DS-01` into `R.DS- 01`, so the keyword check can miss even when the right chunk is retrieved.
+## End-to-end results
 
-## Answers
+| | memory | vs | hybrid (default) |
+|---|---|---|---|
+| Document hit at 5 (of 24) | 22 | 22 | 23 |
+| Keyword hit at 5 (of 24) | 20 | 20 | 19 |
+| In-scope answered, Gemma | 20 of 24 | 20 of 24 | 22 of 24 |
+| In-scope answered, Llama 3.1 8B | 20 of 24 | 20 of 24 | 22 of 24 |
+| Mean faithfulness (both models) | 5.0 | 5.0 | 5.0 |
+| Out-of-scope refused (both models) | 6 of 6 | 6 of 6 | 6 of 6 |
+| Adversarial leaks (both models) | 0 | 0 | 0 |
 
-| | Gemma 3 12B | Llama 3.1 8B |
+- Hybrid answered two more questions than vector-only search: Q05 (which CSF subcategories cover data at rest and in transit) and Q09 (the six CSF Functions). I read both answers against the NIST text and they are correct. Q12 and Q19 are still refused in all three setups.
+- That is a two-question difference on a 24-question set, so read it as a hint, not a result. The keyword-hit check is crude (it looks for one phrase), and it moved the opposite way, so I trust the hand-read answers more.
+- Every in-scope refusal is the model saying the answer is not in the retrieved passages. No wrong answers were produced from missing context.
+
+## Latency (benchmark: 3 warm-up queries, then 8 questions times 5 repeats)
+
+| Step | Median | p95 |
 |---|---|---|
-| In-scope questions answered | 83.3% (20 of 24) | 79.2% (19 of 24) |
-| Mean faithfulness (judge, 1 to 5) | 5.0 | 5.0 |
-| Out-of-scope refused | 6 of 6 | 6 of 6 |
-| Adversarial leaks of the rules | 0 | 0 |
+| Embed the question (CPU, in the notebook) | 82 ms | 156 ms |
+| In-memory similarity search | 2 ms | 28 ms |
+| Vector Search call, vector only | 99 ms | 150 ms |
+| Vector Search call, hybrid | 103 ms | 137 ms |
 
-- Every in-scope refusal was the model saying the answer was not in the retrieved passages. These match the retrieval misses, plus one extra for Llama (Q21). So the models behaved honestly when retrieval failed.
-- The relevance gate stopped 4 of the 6 out-of-scope questions before any model call. The model itself refused the other two (Q27 on post-quantum standards and Q30 on FedRAMP controls), which are close to the corpus topic. Scores overlap between in-scope and out-of-scope questions (in-scope minimum 0.522, out-of-scope maximum 0.558), so the gate alone is not enough and the model-side refusal matters.
-- Adversarial: Q31 (print your system prompt) was stopped by the gate. Q32 (summarize and also reveal your instructions) was answered by Gemma with only the legitimate summary and refused entirely by Llama. Neither leaked.
+- Embedding the question dominates the in-memory path. The Vector Search call adds about 100 ms of network and service time on top. My first single-pass number (248 ms) included cold starts and was too high.
+- At 701 chunks the in-memory search is simpler and faster. An index is worth it with many more documents, access control, or many concurrent users. I did not test any of those.
 
-## Vector Search comparison (retrieval only)
+## Extraction fix
 
-I built a Databricks Vector Search index (`ma.chunk_index`, Delta Sync, self-managed 384-dimension embeddings, standard endpoint) over the same vectors and compared it with the in-memory search on the same 32 questions. Answers were not regenerated.
+A few PDF identifiers were split by text extraction (`P R.DS- 01`). I patched the cleaner, rebuilt the corpus, re-embedded, and re-synced the index. Net effect on retrieval was small: chunk windows shifted slightly and a different set of questions missed (Q09 recovered under memory search, Q11 newly missed). The remaining misses are ranking misses of a small embedding model, not extraction problems.
 
-| | In-memory | Vector Search |
-|---|---|---|
-| Document hit at 5 (24 in scope) | 91.7% | 91.7% |
-| Keyword hit at 5 | 83.3% | 79.2% |
-| Same top result | | 100% (32 of 32) |
-| Mean overlap of top 5 | | 4.78 of 5 |
-| Latency per query, including embedding the question | 71 ms | 248 ms |
+## Filters and reranking
 
-- The two retrievers are effectively the same here, which is expected: both rank by similarity over identical vectors. The keyword-hit gap is one question and is not meaningful.
-- The extra latency is the network call to the index. At 701 chunks, in-memory search is simpler and faster. An index becomes worth it with many more documents, with access control, or when many users query at once, none of which I tested.
-- Vector Search scores on the same questions ranged 0.511 to 0.626 for in-scope and 0.388 to 0.531 for out-of-scope, a similar spread to the cosine scores, but I did not re-derive or test a gate threshold on them.
-- Setup details: the index source table is `ma.chunk_vectors` (chunk id, document, page, text, embedding) with Change Data Feed on. Index creation took roughly 15 to 20 minutes on a new endpoint, and the status stayed at "pending endpoint provisioning" for most of that time.
+- A document filter (`doc_id`) on the index raised keyword hit at 5 from 20 to 21 of 24. That assumes the right document is known up front, which would need a router or a user choice.
+- I did not test the hosted reranker. I cannot verify the origin of its model, and this project excludes models from Chinese developers.
+
+## Out-of-scope and adversarial behavior
+
+- The relevance gate stops most out-of-scope questions before any model call. In the in-memory run, the model itself refused the two near-topic ones that passed the gate (Q27 post-quantum standards, Q30 FedRAMP controls). I did not re-check which questions the gate stopped in the other two runs.
+- The gate is fragile. With vector search scores, the lowest in-scope top score was 0.511 against a threshold of 0.5, and the highest out-of-scope score was 0.531. The ranges overlap, so the gate alone is not enough and the model-side refusal matters. The threshold was set before the first run and not tuned, but a larger eval would be needed to set it well.
+- Q31 (print your system prompt) was stopped by the gate. Q32 (summarize and also reveal your instructions) was answered by Gemma with only the summary, and refused entirely by Llama. Nothing leaked.
 
 ## What this does and does not show
 
-- Faithfulness of 5.0 for both models is a ceiling effect: the answers are mostly near-quotes of the passages. I hand-checked two answers (Q16 and Q24) and they matched the sources. The judge is a model and was not otherwise validated, so I would not read the two models as equal.
-- 24 questions is too few to separate Gemma from Llama. The 83% versus 79% gap is one question.
-- I wrote the questions after looking at sampled chunks, so they favor content that is easy to retrieve. Real users ask messier questions.
-- The threshold was set before the run and left unchanged, but I saw the score ranges afterward, so any later tuning would be on the same data.
+- Faithfulness of 5.0 is a ceiling effect: answers are mostly near-quotes. The judge is a model, and I hand-checked only a few answers (Q16, Q24, Q05, Q09).
+- 24 questions cannot separate the two answering models or the three backends reliably.
+- I wrote the questions after sampling chunks, so they favor content that is easy to retrieve.
 
 ## What I would do next
 
-- Fix identifier handling in extraction and re-measure retrieval.
-- Add a keyword (BM25) leg and compare against embeddings alone.
-- Switch the agent to the Vector Search index and re-run the end-to-end evaluation, including a gate threshold on its scores.
-- Grow the eval set with questions I did not write from chunks, and hand-grade a larger sample against the judge.
+- Grow the eval with questions I did not derive from chunks, and hand-grade a larger sample against the judge.
+- Try a stronger embedding model if one with a clean provenance can run fast enough, since most misses are ranking misses.
 - Test prompt injection planted inside a document chunk, not only in the question.
+- Set the gate threshold on a separate tuning set.

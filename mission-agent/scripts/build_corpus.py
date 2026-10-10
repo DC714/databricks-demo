@@ -25,7 +25,11 @@ WORDS, OVERLAP = 200, 40
 def clean(t):
     t = re.sub(r"-\n(?=[a-z])", "", t)
     t = t.replace("\u2013", "-").replace("\u2014", "-")  # repo rule: no em or en dashes
-    return re.sub(r"\s+", " ", t).strip()
+    t = re.sub(r"\s+", " ", t).strip()
+    # PDF extraction sometimes splits control identifiers such as "PR.DS-01" into "P R.DS- 01".
+    t = re.sub(r"\b([A-Z]) ([A-Z]\.[A-Z]{2})- ?(\d{2})\b", r"\1\2-\3", t)
+    t = re.sub(r"\b([A-Z]{1,2}\.[A-Z]{2})- (\d{2})\b", r"\1-\2", t)
+    return re.sub(r"\bT he\b", "The", t)
 
 
 def main():

@@ -74,9 +74,8 @@ python3 -m unittest discover mission-agent/tests
 Optional Vector Search comparison (on Free Edition one endpoint is allowed, so check your quota first):
 
 ```bash
-databricks vector-search-endpoints create-endpoint mission-agent-vs STANDARD --no-wait
-# source table with Change Data Feed, then a Delta Sync index with self-managed 384-dimension embeddings
-# (SQL and index JSON are in docs/evaluation.md), then:
+mission-agent/scripts/create_vector_index.sh <catalog> <warehouse_id>
+# wait until the index is online (15 to 20 minutes), then import notebook 02 if you have not, and:
 mission-agent/scripts/run_notebook.sh 04_vector_search_compare
 ```
 

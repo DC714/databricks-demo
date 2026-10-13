@@ -40,6 +40,10 @@ flowchart LR
 3. Citation check: every cited id must be a retrieved passage, with one retry.
 4. Leak check: a canary string in the rules must never appear in an answer.
 
+## Interactive app
+
+`app/` is a Streamlit front end deployed as a Databricks App (Free Edition allows one). You type a question, pick Gemma or Llama and vector or hybrid search, and see the answer, the retrieved passages with page numbers, and a trace showing the relevance score and why an answer was refused. The guardrail logic is in `app/guardrails.py` and has local tests. The app runs under its own service principal, which needs read access to the index and permission to query the two model endpoints (`scripts/deploy_app.sh` prints the steps). It is a demo for one user, with no authentication beyond the workspace sign-in, no rate limiting, and no logging.
+
 ## Results
 
 See `docs/evaluation.md` for the numbers, the failures, and what they do and do not show.
@@ -51,7 +55,8 @@ See `docs/evaluation.md` for the numbers, the failures, and what they do and do 
 | Corpus builder | `scripts/build_corpus.py`, output `data/nist_chunks.csv` |
 | Eval questions | `data/eval_questions.csv` |
 | Notebooks | `notebooks/00_check_embeddings.py`, `01_embed_corpus.py`, `02_rag_agent.py`, `03_evaluate.py`, `04_vector_search_compare.py` |
-| Helpers | `scripts/run_notebook.sh`, `scripts/sql.sh` |
+| App | `app/`, deployed with `scripts/deploy_app.sh` |
+| Helpers | `scripts/run_notebook.sh`, `scripts/sql.sh`, `scripts/create_vector_index.sh` |
 | Tests | `tests/` |
 | Talk track | `docs/talk-track.md` |
 

@@ -1,0 +1,8 @@
+command: ["streamlit", "run", "app.py", "--server.headless", "true"]
+env:
+  - name: CATALOG
+    value: workspace
+  - name: THRESHOLD
+    value: "0.5"
+  - name: HF_HOME
+    value: /tmp/hf

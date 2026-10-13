@@ -21,7 +21,7 @@ The eval is small and I wrote it myself, so I treat it as a sanity check. Next I
 
 ## Live demo (about 3 minutes)
 
-Open the app. Ask the CSF functions question and show the answer, the cited passage and the trace. Ask the capital of France and show the gate refusing before any model call. Ask the system prompt question and show the refusal. Flip hybrid search off and ask the same question to show the difference. Say what the app is not: one user, no auth beyond the workspace, no rate limiting.
+Open the app. Use the three answerable example buttons (the six Functions, the authorizing official delegation question, and plan of action and milestones) and show the answer, the cited passage and the trace. Then click the capital of France button and show the gate refusing before any model call. If asked about prompt injection, type the system prompt question yourself and show the refusal. Flip hybrid search off and ask the same question to show the difference. Say what the app is not: one user, no auth beyond the workspace, no rate limiting.
 
 ## What I built
 

@@ -2,9 +2,9 @@
 
 A learning project: a small, governed lakehouse for public-sector spending data, built on Databricks Free Edition.
 
-## Honest framing
+## Summary
 
-This is a hands-on learning project by Dave Contreras. It was built on Databricks Free Edition (serverless compute only, one small SQL warehouse, daily quotas). It is not production experience with Databricks at an agency, and nothing here should be read as a claim of FedRAMP, IL4/IL5, or other authorization. Items in `docs/reference-architecture.md` about extending this to a real agency are things to verify, not things I have done.
+It was built on Databricks Free Edition (serverless compute only, one small SQL warehouse, daily quotas). Items in `docs/reference-architecture.md` about extending this to a real agency are things to verify.
 
 All data is public (USAspending.gov federal award data) or synthetic (the analyst roles table, labeled as such). No employer or client data is used.
 

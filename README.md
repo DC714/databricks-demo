@@ -65,4 +65,4 @@ tests/                 local checks that run without Databricks
 
 ## Status
 
-Module A: notebooks 01 to 04, talk track, and reference architecture are written. Screenshots (docs/img) are still to capture. Later modules (agent, GTM kit) are out of scope for this repo state.
+All three projects are built and written up: this governed lakehouse (notebooks 01 to 04, dashboard screenshots in `docs/img`, talk track, reference architecture), `digital-natives-kit/`, and `mission-agent/` (including the Streamlit app deployed as a Databricks App). Each README lists what it does not show.
